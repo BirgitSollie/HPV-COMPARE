@@ -113,7 +113,7 @@ ScreeningExpected <- function(scr.up,fr.lesions,fr.cancer,AFs_CIN2plus_age1,AFs_
 }
 ###########################################################################################################
 
-CancerExpected <- function(S,ca.risk,ca_survdata,AFs_types,costs_ca,PAF,HR){
+CancerExpected <- function(S,ca.risk,ca_survdata,AFs_types,costs_ca,QALY_ca,PAF,HR){
   
   #Risk for time spend in the age group (approximately)
   ca.risk_grp <- 5*ca.risk
@@ -142,6 +142,10 @@ CancerExpected <- function(S,ca.risk,ca_survdata,AFs_types,costs_ca,PAF,HR){
 
   costs_ca1_exp <- nr.cancers_exp%*%diag(costs1_ca_age)
   costs_ca2_exp <- nr.cancers_exp%*%diag(costs2_ca_age)
+  
+  #Additional QALY loss per cancer diagnosis (irrespective of survival)
+  QALYloss <- sum(nr.cancers_exp)*QALY_ca
+  LYs.loss_exp <- LYs.loss_exp + QALYloss
   
   list(nr.ca_exp=nr.cancers_exp,costs1_exp=costs_ca1_exp,costs2_exp=costs_ca2_exp,LYs.loss_exp=LYs.loss_exp)
 }

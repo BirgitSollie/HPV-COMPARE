@@ -3,7 +3,7 @@ RiskReductions <- function(scenario){
   #Sets the type-specific and age-dependent relative risk reductions 
   #according to a given scenario and for the different vaccines
   #For each vaccine and gender (women, men and MSM), 
-  #RRR is a matrix of size 9x100
+  #RRR is a matrix of size 10x100
   #Rows correspond to HPV types (hr) and columns to ages 1:100
   
   #scenario = (scenario_HR, scenario_LR,AW/RRP)
@@ -24,11 +24,12 @@ RiskReductions <- function(scenario){
   
   #Gender neutral vaccination (2 dose) at age 10
   
-  #Vaccine efficacy types for ongogenic types 16,18,31,33,39,45,51,52,58
-  VE_2vCons <- c(0.98,0.98,0,0,0,0,0,0,0) #2v conservative
-  VE_2vMid <- c(0.98,0.98,0.75,0.5,0,0.8,0,0,0) #2v middle
-  VE_2vLib <- c(0.98,0.98,0.88,0.68,0.75,0.82,0.54,0,0) #2v liberal
-  VE_9v <- c(0.98,0.98,0.97,0.97,0,0.97,0,0.97,0.97) #9v
+  #Vaccine efficacy types for ongogenic types 16,18,31,33,35,39,45,51,52,58
+  VE_2vCons <- c(0.98,0.98,0,0,0,0,0,0,0,0) #2v conservative
+  VE_2vMid <- c(0.98,0.98,0.75,0.5,0,0,0.8,0,0,0) #2v middle
+  VE_2vLib1 <- c(0.98,0.98,0.88,0.68,0,0.75,0.82,0.54,0,0) #2v very high cross-protection
+  VE_2vLib2 <- c(0.98,0.98,0.66,0.41,0.40,0,0.81,0,0.36,0.30) #2v high cross-protection
+  VE_9v <- c(0.98,0.98,0.97,0.97,0,0,0.97,0,0.97,0.97) #9v
   
   #Compute RRRs for the HR types
   if (sc_HR == 1){ 
@@ -44,10 +45,15 @@ RiskReductions <- function(scenario){
     RRR_2vMid_w[,1:a0] <- 0 #no reduction before vaccination
     RRR_2vMid_m[,1:a0] <- 0
     
-    RRR_2vLib_w <- matrix(vacc.up[1]*VE_2vLib,types,100)
-    RRR_2vLib_m <- matrix(vacc.up[2]*VE_2vLib,types,100)
-    RRR_2vLib_w[,1:a0] <- 0 #no reduction before vaccination
-    RRR_2vLib_m[,1:a0] <- 0
+    RRR_2vLib1_w <- matrix(vacc.up[1]*VE_2vLib1,types,100)
+    RRR_2vLib1_m <- matrix(vacc.up[2]*VE_2vLib1,types,100)
+    RRR_2vLib1_w[,1:a0] <- 0 #no reduction before vaccination
+    RRR_2vLib1_m[,1:a0] <- 0
+    
+    RRR_2vLib2_w <- matrix(vacc.up[1]*VE_2vLib2,types,100)
+    RRR_2vLib2_m <- matrix(vacc.up[2]*VE_2vLib2,types,100)
+    RRR_2vLib2_w[,1:a0] <- 0 #no reduction before vaccination
+    RRR_2vLib2_m[,1:a0] <- 0
     
     RRR_4v_w <- RRR_2vCons_w
     RRR_4v_m <- RRR_2vCons_m
@@ -60,7 +66,8 @@ RiskReductions <- function(scenario){
     #For now
     RRR_2vCons_MSM <- RRR_2vCons_m
     RRR_2vMid_MSM <- RRR_2vMid_m
-    RRR_2vLib_MSM <- RRR_2vLib_m
+    RRR_2vLib1_MSM <- RRR_2vLib1_m
+    RRR_2vLib2_MSM <- RRR_2vLib2_m
     RRR_4v_MSM <- RRR_4v_m
     RRR_9v_MSM <- RRR_9v_m
     
@@ -78,27 +85,32 @@ RiskReductions <- function(scenario){
     RRR_2vCons_m <- matrix(0,types,100)
     RRR_2vMid_w <- matrix(0,types,100)
     RRR_2vMid_m <- matrix(0,types,100)
-    RRR_2vLib_w <- matrix(0,types,100)
-    RRR_2vLib_m <- matrix(0,types,100)
+    RRR_2vLib1_w <- matrix(0,types,100)
+    RRR_2vLib1_m <- matrix(0,types,100)
+    RRR_2vLib2_w <- matrix(0,types,100)
+    RRR_2vLib2_m <- matrix(0,types,100)
     RRR_9v_w <- matrix(0,types,100)
     RRR_9v_m <- matrix(0,types,100)
     
     #plugging in the correct RRRs
     RRR_2vCons_w[c(1,2),] <- RRRs_w[c(1,2),]
     RRR_2vCons_m[c(1,2),] <- RRRs_m[c(1,2),]
-    RRR_2vMid_w[c(1,2,3,4,6),] <- RRRs_w[c(1,2,3,6,10),]
-    RRR_2vMid_m[c(1,2,3,4,6),] <- RRRs_m[c(1,2,3,6,10),]
-    RRR_2vLib_w[c(1:7),] <- RRRs_w[c(1,2,4,7,9,11,13),]
-    RRR_2vLib_m[c(1:7),] <- RRRs_m[c(1,2,4,7,9,11,13),]
+    RRR_2vMid_w[c(1,2,3,4,7),] <- RRRs_w[c(1,2,4,8,13),]
+    RRR_2vMid_m[c(1,2,3,4,7),] <- RRRs_m[c(1,2,4,8,13),]
+    RRR_2vLib1_w[c(1,2,3,4,6,7,8),] <- RRRs_w[c(1,2,5,9,12,15,17),]
+    RRR_2vLib1_m[c(1,2,3,4,6,7,8),] <- RRRs_m[c(1,2,5,9,12,15,17),]
+    RRR_2vLib2_w[c(1,2,3,4,5,7,9,10),] <- RRRs_w[c(1,2,3,7,11,14,18,20),]
+    RRR_2vLib2_m[c(1,2,3,4,5,7,9,10),] <- RRRs_m[c(1,2,3,7,11,14,18,20),]
     RRR_4v_w <- RRR_2vCons_w
     RRR_4v_m <- RRR_2vCons_m
-    RRR_9v_w[c(1,2,3,4,6,8,9),] <- RRRs_w[c(1,2,5,8,12,14,15),]
-    RRR_9v_m[c(1,2,3,4,6,8,9),] <- RRRs_m[c(1,2,5,8,12,14,15),]
+    RRR_9v_w[c(1,2,3,4,7,9,10),] <- RRRs_w[c(1,2,6,10,16,19,21),]
+    RRR_9v_m[c(1,2,3,4,7,9,10),] <- RRRs_m[c(1,2,6,10,16,19,21),]
     
     #For now
     RRR_2vCons_MSM <- RRR_2vCons_m
     RRR_2vMid_MSM <- RRR_2vMid_m
-    RRR_2vLib_MSM <- RRR_2vLib_m
+    RRR_2vLib1_MSM <- RRR_2vLib1_m
+    RRR_2vLib2_MSM <- RRR_2vLib2_m
     RRR_4v_MSM <- RRR_4v_m
     RRR_9v_MSM <- RRR_9v_m
 
@@ -120,78 +132,89 @@ RiskReductions <- function(scenario){
     RRR_2vCons_m <- matrix(0,types,100)
     RRR_2vMid_w <- matrix(0,types,100)
     RRR_2vMid_m <- matrix(0,types,100)
-    RRR_2vLib_w <- matrix(0,types,100)
-    RRR_2vLib_m <- matrix(0,types,100)
+    RRR_2vLib1_w <- matrix(0,types,100)
+    RRR_2vLib1_m <- matrix(0,types,100)
+    RRR_2vLib2_w <- matrix(0,types,100)
+    RRR_2vLib2_m <- matrix(0,types,100)
     RRR_9v_w <- matrix(0,types,100)
     RRR_9v_m <- matrix(0,types,100)
     
     #plugging in the correct RRRs
     RRR_2vCons_w[c(1,2),] <- RRRs_w[c(1,2),]
     RRR_2vCons_m[c(1,2),] <- RRRs_m[c(1,2),]
-    RRR_2vMid_w[c(1,2,3,4,6),] <- RRRs_w[c(1,2,3,6,10),]
-    RRR_2vMid_m[c(1,2,3,4,6),] <- RRRs_m[c(1,2,3,6,10),]
-    RRR_2vLib_w[c(1:7),] <- RRRs_w[c(1,2,4,7,9,11,13),]
-    RRR_2vLib_m[c(1:7),] <- RRRs_m[c(1,2,4,7,9,11,13),]
+    RRR_2vMid_w[c(1,2,3,4,7),] <- RRRs_w[c(1,2,4,8,13),]
+    RRR_2vMid_m[c(1,2,3,4,7),] <- RRRs_m[c(1,2,4,8,13),]
+    RRR_2vLib1_w[c(1,2,3,4,6,7,8),] <- RRRs_w[c(1,2,5,9,12,15,17),]
+    RRR_2vLib1_m[c(1,2,3,4,6,7,8),] <- RRRs_m[c(1,2,5,9,12,15,17),]
+    RRR_2vLib2_w[c(1,2,3,4,5,7,9,10),] <- RRRs_w[c(1,2,3,7,11,14,18,20),]
+    RRR_2vLib2_m[c(1,2,3,4,5,7,9,10),] <- RRRs_m[c(1,2,3,7,11,14,18,20),]
     RRR_4v_w <- RRR_2vCons_w
     RRR_4v_m <- RRR_2vCons_m
-    RRR_9v_w[c(1,2,3,4,6,8,9),] <- RRRs_w[c(1,2,5,8,12,14,15),]
-    RRR_9v_m[c(1,2,3,4,6,8,9),] <- RRRs_m[c(1,2,5,8,12,14,15),]
+    RRR_9v_w[c(1,2,3,4,7,9,10),] <- RRRs_w[c(1,2,6,10,16,19,21),]
+    RRR_9v_m[c(1,2,3,4,7,9,10),] <- RRRs_m[c(1,2,6,10,16,19,21),]
     
     #For now
     RRR_2vCons_MSM <- RRR_2vCons_m
     RRR_2vMid_MSM <- RRR_2vMid_m
-    RRR_2vLib_MSM <- RRR_2vLib_m
+    RRR_2vLib1_MSM <- RRR_2vLib1_m
+    RRR_2vLib2_MSM <- RRR_2vLib2_m
     RRR_4v_MSM <- RRR_4v_m
     RRR_9v_MSM <- RRR_9v_m
     
   } else if (sc_HR == 4){ 
-    #scenario 3: All-or-nothing VE, waning, + herd immunity
+    #scenario 4: All-or-nothing VE, waning (non-targeted types only), + herd immunity
     
     #Extreme waning scenario: waning starts at age 20, protection very small at age 40
     #exp(-20*0.15) = 0.05
     
     #waning only for the non-targeted types (cross protection)
     
-    #Relative risk reductions
-    RRRs_w <- (HPVinc_pre_f_set - HPVinc_post_f)/HPVinc_pre_f_set
-    RRRs_w[is.na(RRRs_w)] <- 0
-    RRRs_m <- (HPVinc_pre_m_set - HPVinc_post_m)/HPVinc_pre_m_set
-    RRRs_m[is.na(RRRs_m)] <- 0
-    
     #matrices for the different vaccines
     RRR_2vCons_w <- matrix(0,types,100)
     RRR_2vCons_m <- matrix(0,types,100)
     RRR_2vMid_w <- matrix(0,types,100)
     RRR_2vMid_m <- matrix(0,types,100)
-    RRR_2vLib_w <- matrix(0,types,100)
-    RRR_2vLib_m <- matrix(0,types,100)
+    RRR_2vLib1_w <- matrix(0,types,100)
+    RRR_2vLib1_m <- matrix(0,types,100)
+    RRR_2vLib2_w <- matrix(0,types,100)
+    RRR_2vLib2_m <- matrix(0,types,100)
     RRR_9v_w <- matrix(0,types,100)
     RRR_9v_m <- matrix(0,types,100)
+    
+    
+    #Relative risk reductions (without waning)
+    RRRs_w <- (HPVinc_pre_f_set - HPVinc_post_f)/HPVinc_pre_f_set
+    RRRs_w[is.na(RRRs_w)] <- 0
+    RRRs_m <- (HPVinc_pre_m_set - HPVinc_post_m)/HPVinc_pre_m_set
+    RRRs_m[is.na(RRRs_m)] <- 0
     
     #plugging in the correct RRRs
     RRR_2vCons_w[c(1,2),] <- RRRs_w[c(1,2),]
     RRR_2vCons_m[c(1,2),] <- RRRs_m[c(1,2),]
     RRR_4v_w <- RRR_2vCons_w
     RRR_4v_m <- RRR_2vCons_m
-    RRR_9v_w[c(1,2,3,4,6,8,9),] <- RRRs_w[c(1,2,5,8,12,14,15),]
-    RRR_9v_m[c(1,2,3,4,6,8,9),] <- RRRs_m[c(1,2,5,8,12,14,15),]
+    RRR_9v_w[c(1,2,3,4,7,9,10),] <- RRRs_w[c(1,2,6,10,16,19,21),]
+    RRR_9v_m[c(1,2,3,4,7,9,10),] <- RRRs_m[c(1,2,6,10,16,19,21),]
     
-    #Relative risk reductions
+    #Relative risk reductions (with waning)
     RRRs_w <- (HPVinc_pre_f_set - HPVinc_post_f_waning015)/HPVinc_pre_f_set
     RRRs_w[is.na(RRRs_w)] <- 0
     RRRs_m <- (HPVinc_pre_m_set - HPVinc_post_m_waning015)/HPVinc_pre_m_set
     RRRs_m[is.na(RRRs_m)] <- 0
     
     #plugging in the correct RRRs
-    RRR_2vMid_w[c(1,2,3,4,6),] <- RRRs_w[c(1,2,3,6,10),]
-    RRR_2vMid_m[c(1,2,3,4,6),] <- RRRs_m[c(1,2,3,6,10),]
-    RRR_2vLib_w[c(1:7),] <- RRRs_w[c(1,2,4,7,9,11,13),]
-    RRR_2vLib_m[c(1:7),] <- RRRs_m[c(1,2,4,7,9,11,13),]
-    
+    RRR_2vMid_w[c(1,2,3,4,7),] <- RRRs_w[c(1,2,4,8,13),]
+    RRR_2vMid_m[c(1,2,3,4,7),] <- RRRs_m[c(1,2,4,8,13),]
+    RRR_2vLib1_w[c(1,2,3,4,6,7,8),] <- RRRs_w[c(1,2,5,9,12,15,17),]
+    RRR_2vLib1_m[c(1,2,3,4,6,7,8),] <- RRRs_m[c(1,2,5,9,12,15,17),]
+    RRR_2vLib2_w[c(1,2,3,4,5,7,9,10),] <- RRRs_w[c(1,2,3,7,11,14,18,20),]
+    RRR_2vLib2_m[c(1,2,3,4,5,7,9,10),] <- RRRs_m[c(1,2,3,7,11,14,18,20),]
+
     #For now
     RRR_2vCons_MSM <- RRR_2vCons_m
     RRR_2vMid_MSM <- RRR_2vMid_m
-    RRR_2vLib_MSM <- RRR_2vLib_m
+    RRR_2vLib1_MSM <- RRR_2vLib1_m
+    RRR_2vLib2_MSM <- RRR_2vLib2_m
     RRR_4v_MSM <- RRR_4v_m
     RRR_9v_MSM <- RRR_9v_m
   }
@@ -211,12 +234,14 @@ RiskReductions <- function(scenario){
   
   RRR_2vCons <- list(w=RRR_2vCons_w, m=RRR_2vCons_m, MSM=RRR_2vCons_MSM)
   RRR_2vMid <- list(w=RRR_2vMid_w, m=RRR_2vMid_m, MSM=RRR_2vMid_MSM)
-  RRR_2vLib <- list(w=RRR_2vLib_w, m=RRR_2vLib_m, MSM=RRR_2vLib_MSM)
+  RRR_2vLib1 <- list(w=RRR_2vLib1_w, m=RRR_2vLib1_m, MSM=RRR_2vLib1_MSM)
+  RRR_2vLib2 <- list(w=RRR_2vLib2_w, m=RRR_2vLib2_m, MSM=RRR_2vLib2_MSM)
   RRR_4v <- list(w=RRR_4v_w, m=RRR_4v_m, MSM=RRR_4v_MSM)
   RRR_9v <- list(w=RRR_9v_w, m=RRR_9v_m, MSM=RRR_9v_MSM)
   RRR_611 <- list(w=RRR_611_w, m=RRR_611_m)
   
-  return(list(RRR_2vCons=RRR_2vCons,RRR_2vMid=RRR_2vMid,RRR_2vLib=RRR_2vLib,RRR_4v=RRR_4v,RRR_9v=RRR_9v,
+  return(list(RRR_2vCons=RRR_2vCons,RRR_2vMid=RRR_2vMid,RRR_2vLib1=RRR_2vLib1,RRR_2vLib2=RRR_2vLib2,
+              RRR_4v=RRR_4v,RRR_9v=RRR_9v,
               RRR_611=RRR_611,vacc.up=vacc.up))
 }
 ###########################################################################################################
@@ -231,7 +256,8 @@ RiskReductionScreening <- function(scenario,agegrps.scr){
     
     RRscreening_2v.cons <- RRR_2v.cons_w[,agegrps.scr]
     RRscreening_2v.mid <- RRR_2v.mid_w[,agegrps.scr]
-    RRscreening_2v.lib <- RRR_2v.lib_w[,agegrps.scr]
+    RRscreening_2v.lib1 <- RRR_2v.lib1_w[,agegrps.scr]
+    RRscreening_2v.lib2 <- RRR_2v.lib2_w[,agegrps.scr]
     RRscreening_4v <- RRR_4v_w[,agegrps.scr]
     RRscreening_9v <- RRR_9v_w[,agegrps.scr]
     
@@ -245,15 +271,17 @@ RiskReductionScreening <- function(scenario,agegrps.scr){
     #matrices for the different vaccines
     RRscreening_2v.cons <- matrix(0,types,7)
     RRscreening_2v.mid <- matrix(0,types,7)
-    RRscreening_2v.lib <- matrix(0,types,7)
+    RRscreening_2v.lib1 <- matrix(0,types,7)
+    RRscreening_2v.lib2 <- matrix(0,types,7)
     RRscreening_9v <- matrix(0,types,7)
     
     #plugging in the correct RRRs
     RRscreening_2v.cons[c(1,2),] <- RRRprev_w[c(1,2),agegrps.scr]
-    RRscreening_2v.mid[c(1,2,3,4,6),] <- RRRprev_w[c(1,2,3,6,10),agegrps.scr]
-    RRscreening_2v.lib[c(1:7),] <- RRRprev_w[c(1,2,4,7,9,11,13),agegrps.scr]
+    RRscreening_2v.mid[c(1,2,3,4,7),] <- RRRprev_w[c(1,2,4,8,13),agegrps.scr]
+    RRscreening_2v.lib1[c(1,2,3,4,6,7,8),] <- RRRprev_w[c(1,2,5,9,12,15,17),agegrps.scr]
+    RRscreening_2v.lib2[c(1,2,3,4,5,7,9,10),] <- RRRprev_w[c(1,2,3,7,11,14,18,20),agegrps.scr]
     RRscreening_4v <- RRscreening_2v.cons
-    RRscreening_9v[c(1,2,3,4,6,8,9),] <- RRRprev_w[c(1,2,5,8,12,14,15),agegrps.scr]
+    RRscreening_9v[c(1,2,3,4,7,9,10),] <- RRRprev_w[c(1,2,6,10,16,19,21),agegrps.scr]
     
   } else if (sc_HR == 3){ 
     #scenario 3: All-or-nothing VE, waning, + herd immunity
@@ -265,15 +293,17 @@ RiskReductionScreening <- function(scenario,agegrps.scr){
     #matrices for the different vaccines
     RRscreening_2v.cons <- matrix(0,types,7)
     RRscreening_2v.mid <- matrix(0,types,7)
-    RRscreening_2v.lib <- matrix(0,types,7)
+    RRscreening_2v.lib1 <- matrix(0,types,7)
+    RRscreening_2v.lib2 <- matrix(0,types,7)
     RRscreening_9v <- matrix(0,types,7)
     
     #plugging in the correct RRRs
     RRscreening_2v.cons[c(1,2),] <- RRRprev_w[c(1,2),agegrps.scr]
-    RRscreening_2v.mid[c(1,2,3,4,6),] <- RRRprev_w[c(1,2,3,6,10),agegrps.scr]
-    RRscreening_2v.lib[c(1:7),] <- RRRprev_w[c(1,2,4,7,9,11,13),agegrps.scr]
+    RRscreening_2v.mid[c(1,2,3,4,7),] <- RRRprev_w[c(1,2,4,8,13),agegrps.scr]
+    RRscreening_2v.lib1[c(1,2,3,4,6,7,8),] <- RRRprev_w[c(1,2,5,9,12,15,17),agegrps.scr]
+    RRscreening_2v.lib2[c(1,2,3,4,5,7,9,10),] <- RRRprev_w[c(1,2,3,7,11,14,18,20),agegrps.scr]
     RRscreening_4v <- RRscreening_2v.cons
-    RRscreening_9v[c(1,2,3,4,6,8,9),] <- RRRprev_w[c(1,2,5,8,12,14,15),agegrps.scr]
+    RRscreening_9v[c(1,2,3,4,7,9,10),] <- RRRprev_w[c(1,2,6,10,16,19,21),agegrps.scr]
     
   } else if (sc_HR == 4){ 
     #scenario 4: All-or-nothing VE, waning, + herd immunity
@@ -289,7 +319,7 @@ RiskReductionScreening <- function(scenario,agegrps.scr){
     #plugging in the correct RRRs
     RRscreening_2v.cons[c(1,2),] <- RRRprev_w[c(1,2),agegrps.scr]
     RRscreening_4v <- RRscreening_2v.cons
-    RRscreening_9v[c(1,2,3,4,6,8,9),] <- RRRprev_w[c(1,2,5,8,12,14,15),agegrps.scr]
+    RRscreening_9v[c(1,2,3,4,7,9,10),] <- RRRprev_w[c(1,2,6,10,16,19,21),agegrps.scr]
     
     #Relative risk reductions
     RRRprev_w <- (HPVprev_pre_f_set - HPVprev_post_f_waning015)/HPVprev_pre_f_set
@@ -297,16 +327,18 @@ RiskReductionScreening <- function(scenario,agegrps.scr){
     
     #matrices for the different vaccines
     RRscreening_2v.mid <- matrix(0,types,7)
-    RRscreening_2v.lib <- matrix(0,types,7)
+    RRscreening_2v.lib1 <- matrix(0,types,7)
+    RRscreening_2v.lib2 <- matrix(0,types,7)
     
     #plugging in the correct RRRs
-    RRscreening_2v.mid[c(1,2,3,4,6),] <- RRRprev_w[c(1,2,3,6,10),agegrps.scr]
-    RRscreening_2v.lib[c(1:7),] <- RRRprev_w[c(1,2,4,7,9,11,13),agegrps.scr]
+    RRscreening_2v.mid[c(1,2,3,4,7),] <- RRRprev_w[c(1,2,4,8,13),agegrps.scr]
+    RRscreening_2v.lib1[c(1,2,3,4,6,7,8),] <- RRRprev_w[c(1,2,5,9,12,15,17),agegrps.scr]
+    RRscreening_2v.lib2[c(1,2,3,4,5,7,9,10),] <- RRRprev_w[c(1,2,3,7,11,14,18,20),agegrps.scr]
   }
   
   return(list(RR_2v.cons=RRscreening_2v.cons,RR_2v.mid=RRscreening_2v.mid,
-              RR_2v.lib=RRscreening_2v.lib,RR_4v=RRscreening_4v,
-              RR_9v=RRscreening_9v))
+              RR_2v.lib1=RRscreening_2v.lib1,RR_2v.lib2=RRscreening_2v.lib2,
+              RR_4v=RRscreening_4v,RR_9v=RRscreening_9v))
 }
 
 ###########################################################################################################

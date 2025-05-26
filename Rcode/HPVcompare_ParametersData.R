@@ -8,7 +8,7 @@ cohort <- 100000 #cohort size per gender (at age a0)
 a0 <- 10 #age of vaccination
 amax <- 99
 adiff <- amax - a0
-types <- 9 #16,18,31,33,39,45,51,52,58 (oncogenic types only)
+types <- 10 #16,18,31,33,35,39,45,51,52,58 (oncogenic types only)
 
 #7 age groups in screening: 30-34, 35-39, 40-44, 45-49, 50-54, 55-59, 60+ (60-64)
 agegrps.scr_start <- 30
@@ -23,10 +23,13 @@ ca.ages <- seq((floor(a0/5)+1)*5,85,5)
 agemids.ca <- agegrps.ca*5 - 2
 
 #Discount rates
-d_costs <- 1.04
+#d_costs <- 1.04
+d_costs <- 1.03 #new Dutch guidelines
 d_health <- 1.015
 dvec_c <- 1/(d_costs^(1:adiff))
 dvec_h <- 1/(d_health^(1:adiff))
+
+CEthreshold <- 20000
 
 #Population/survival
 surv_w <- read.table("Data/TablePop_Women2020.txt",header=T)
@@ -46,9 +49,9 @@ for (i in 1:adiff){
 }
 
 #vaccine prices (2-dose)
-vacc.price_2v <- 65 
+vacc.price_2v <- 70 #(admin. costs now indexed to 2024) 
 vacc.price_4v <- 80
-vacc.price_9v <- 100
+vacc.price_9v <- 120 #price difference €50
 
 ##########################
 ### TRANSMISSION MODEL ###
@@ -62,8 +65,8 @@ load(paste("TransmissionModel/VaccineUptake",vacc.up[1],",",vacc.up[2],"/HPVprev
 load(paste("TransmissionModel/VaccineUptake",vacc.up[1],",",vacc.up[2],"/HPVprev_post.RData", sep = "")) #post vacc
 load(paste("TransmissionModel/VaccineUptake",vacc.up[1],",",vacc.up[2],"/HPVprev_post_waning.RData", sep = "")) #post vacc with extreme waning
 
-HPV.inc_w <- HPVinc_pre_f[c(1,2,3,4,6,7,8,9,11),]
-HPV.inc_m <- HPVinc_pre_m[c(1,2,3,4,6,7,8,9,11),]
+HPV.inc_w <- HPVinc_pre_f[c(1,2,3,4,5,6,7,8,9,11),]
+HPV.inc_m <- HPVinc_pre_m[c(1,2,3,4,5,6,7,8,9,11),]
 HPV.inc_MSM <- HPV.inc_m
 
 #############
@@ -74,8 +77,8 @@ HPV.inc_MSM <- HPV.inc_m
 #Incidence per 1000 person-years
 source('Rcode/AnogenitalWarts_Incidence.R')
 
-cost_AW_m <- 117*1.1 #research by UMCG 2021 indexed to 2022
-cost_AW_w <- 117*1.1
+cost_AW_m <- 138.6 #now indexed to 2024 #research by UMCG 2021
+cost_AW_w <- 138.6
 QALY_AW <- 0 #base-case LYs only
 #QALY_AW <- 0.018 #Westra et al. 2013
 PAF.HPV_AW <- 0.9
@@ -103,8 +106,8 @@ PrevUnder18_RRP_sim <- rpois(nr.sim,lambda=2.5)
 PrevAbove18_RRP_sim <- rpois(nr.sim,lambda=2)
 nrYearsAverage_RRP <- 10
 
-#costs indexed from 2019 --> 2022 (121.43/106.16 = *1.144)
-cost_RRP <- 2579#2083*1.144 #Yearly cost per RRP patient
+#costs indexed to 2024
+cost_RRP <- 2038 #Yearly cost per RRP patient
 QALY_RRPlifetime <- 0 #life time QALY loss. Base-case LYs only
 #QALY_RRPlifetime <- 1.05
 QALY_RRP <- QALY_RRPlifetime/nrYearsAverage_RRP #Yearly QALY loss
@@ -132,16 +135,16 @@ births_age_w <- read.table("Data/BirthsPer1000_AgeWomen2020.txt",header=T)
 #################
 
 #Colposcopies
-#costs indexed from 2019 --> 2022 (121.43/106.16 = *1.144)
-cost_colpo <- 316*1.144 #costs CIN0 Jansen2020
+#costs indexed to 2024
+cost_colpo <- 609 #costs CIN0 Jansen2020
 #PPV per age group
 PPV_colpo_no <- c(0.659,rep(0.402,6)) #From Inturrisi IJC2020 table S3
 PPV_colpo_2v <- c(0.548,rep(0.403,6))
 PPV_colpo_2v.cp <- c(0.538,rep(0.384,6))
 PPV_colpo_9v <- c(0.356,rep(0.342,6))
 
-cost_CIN2 <- 1578#1194 # costs from own adjusted computation
-cost_CIN3 <- 1934#1481
+cost_CIN2 <- 1855 # costs from own adjusted computation
+cost_CIN3 <- 2226
 cost_CIN2plus <- 0.68*cost_CIN3 + 0.32*cost_CIN2
 QALY_CIN2plus <- 0 #Base-case LYs only
 #QALY_CIN2plus <- 0.03/12
@@ -163,14 +166,14 @@ n_age1 <- 1019 #nr of women in data <34
 n_age2 <- 1990 #nr of women in data >33
 
 #Last (10th) entry contains all other types
-AFs_CIN2plus_age1_est <- c(0.5628, 0.0619, 0.1144, 0.0691, 0.0101, 0.0274, 0.0364, 0.0402, 0.0360, 0.0417)
-AFs_CIN2plus_age2_est <- c(0.4698, 0.0807, 0.1317, 0.0665, 0.0253, 0.0233, 0.0482, 0.0569, 0.0427, 0.0549)
+AFs_CIN2plus_age1_est <- c(0.5628, 0.0619, 0.1144, 0.0691, 0.0058, 0.0101, 0.0274, 0.0364, 0.0402, 0.0360, 0.0359)
+AFs_CIN2plus_age2_est <- c(0.4698, 0.0807, 0.1317, 0.0665, 0.0313, 0.0253, 0.0233, 0.0482, 0.0569, 0.0427, 0.0236)
 n_CIN2plus_age1 <- AFs_CIN2plus_age1_est*n_age1 #non integers, but not a problem
 n_CIN2plus_age2 <- AFs_CIN2plus_age2_est*n_age2
 
-alpha_dirichlet <- rep(0.5,10) #prior dirichlet distribution AFs
-AFs_CIN2plus_age1_sim <- rdirichlet(nr.sim, (alpha_dirichlet+n_CIN2plus_age1))[,1:9]
-AFs_CIN2plus_age2_sim <- rdirichlet(nr.sim, (alpha_dirichlet+n_CIN2plus_age2))[,1:9]
+alpha_dirichlet <- rep(0.5,types+1) #prior dirichlet distribution AFs
+AFs_CIN2plus_age1_sim <- rdirichlet(nr.sim, (alpha_dirichlet+n_CIN2plus_age1))[,1:types]
+AFs_CIN2plus_age2_sim <- rdirichlet(nr.sim, (alpha_dirichlet+n_CIN2plus_age2))[,1:types]
 
 ##############
 ### CANCER ###
@@ -255,40 +258,48 @@ nr.surv_penis <- as.vector(as.matrix(survdata_penis[,4:13])*matrix(rep(as.numeri
 surv_probs_penis_sim <- mapply(rbeta,shape1=nr.surv_penis+0.5,shape2=nr.risk_penis-nr.surv_penis+0.5,SIMPLIFY = TRUE,MoreArgs=list(n=nr.sim))
 
 #Costs associated with treatment and palliative care respectively. Kok et al. 2011
-#Indexing from 2011 -> 2022 (CPI 93.73% to 121.43% = *1.2955)
-costs_cervix <- c(8000,19600)*1.2955
-costs_anus_w <- c(5000,18800)*1.2955
-costs_anus_m <- c(5000,19500)*1.2955
-costs_oroph_w <- c(6000,19500)*1.2955
-costs_oroph_m <- c(6000,19600)*1.2955
-costs_vulva <- c(8000,16600)*1.2955
-costs_vagina <- c(8000,16600)*1.2955
-costs_penis <- c(4000,19500)*1.2955
+#Indexing from 2011 -> 2024 (CPI 93.73% to 130.31% = *1.39)
+costs_cervix <- c(8000,19600)*1.39
+costs_anus_w <- c(5000,18800)*1.39
+costs_anus_m <- c(5000,19500)*1.39
+costs_oroph_w <- c(6000,19500)*1.39
+costs_oroph_m <- c(6000,19600)*1.39
+costs_vulva <- c(8000,16600)*1.39
+costs_vagina <- c(8000,16600)*1.39
+costs_penis <- c(4000,19500)*1.39
+
+#QALY loss per cancer diagnosis: in base-case =0
+QALY_cervix <- 0
+QALY_anus <- 0
+QALY_oroph <- 0
+QALY_vulva <- 0
+QALY_vagina <- 0
+QALY_penis <- 0
 
 #AF HPV to cancer and type-specific AFs
 PAF.HPV_cervix <- 1
-n_cervix <- c(1348,150,69,117,27,80,28,40,27,172) #From Sanjose et. al. 2010 (Europe)
-AFs_cervix_sim <- rdirichlet(nr.sim, (alpha_dirichlet+n_cervix))[,1:9]
+n_cervix <- c(1348,150,69,117,46,27,80,28,40,27,126) #From Sanjose et. al. 2010 (Europe)
+AFs_cervix_sim <- rdirichlet(nr.sim, (alpha_dirichlet+n_cervix))[,1:types]
 
 PAF.HPV_anus_sim <- rbeta(nr.sim,148+0.5,169-148+0.5)
-n_anus <- c(354,16,8,12,2,4,0,3,8,31)
-AFs_anus_sim <- rdirichlet(nr.sim, (alpha_dirichlet+n_anus))[,1:9]
+n_anus <- c(354,16,8,12,7,2,4,0,3,8,24)
+AFs_anus_sim <- rdirichlet(nr.sim, (alpha_dirichlet+n_anus))[,1:types]
 
 PAF.HPV_oroph_sim <- rbeta(nr.sim,281+0.5,926-281+0.5)
-n_oroph <- c(1650,33,6,44,3,7,0,3,11,114)
-AFs_oroph_sim <- rdirichlet(nr.sim,(alpha_dirichlet+n_oroph))[,1:9]
+n_oroph <- c(1650,33,6,44,24,3,7,0,3,11,90)
+AFs_oroph_sim <- rdirichlet(nr.sim,(alpha_dirichlet+n_oroph))[,1:types]
 
 PAF.HPV_vulva_sim <- rbeta(nr.sim,165+0.5,903-165+0.5)
-n_vulva <- c(311,20,4,28,3,14,0,8,4,35)
-AFs_vulva_sim <- rdirichlet(nr.sim,(alpha_dirichlet+n_vulva))[,1:9]
+n_vulva <- c(311,20,4,28,0,3,14,0,8,4,35)
+AFs_vulva_sim <- rdirichlet(nr.sim,(alpha_dirichlet+n_vulva))[,1:types]
 
 PAF.HPV_vagina_sim <- rbeta(nr.sim,108+0.5,152-108+0.5)
-n_vagina <- c(178,15,16,15,6,11,7,9,11,35)
-AFs_vagina_sim <- rdirichlet(nr.sim,(alpha_dirichlet+n_vagina))[,1:9]
+n_vagina <- c(178,15,16,15,3,6,11,7,9,11,32)
+AFs_vagina_sim <- rdirichlet(nr.sim,(alpha_dirichlet+n_vagina))[,1:types]
 
 PAF.HPV_penis_sim <- rbeta(nr.sim,135+0.5,419-135+0.5)
-n_penis <- c(229,5,3,10,2,9,3,5,4,63)
-AFs_penis_sim <- rdirichlet(nr.sim,(alpha_dirichlet+n_penis))[,1:9]
+n_penis <- c(229,5,3,10,9,2,9,3,5,4,54)
+AFs_penis_sim <- rdirichlet(nr.sim,(alpha_dirichlet+n_penis))[,1:types]
 
 #HRs survival HPV+ vs HPV- cancer
 HR_cervix <- 1
